@@ -1,0 +1,89 @@
+/* ════════════════════════════════════════════════════════════════
+   数织（Nonograms）—— 游戏专用皮肤
+   ════════════════════════════════════════════════════════════════ */
+
+:root {
+  --ng-paper: #fbf7ee;
+  --ng-board: #ece4d3;
+  --ng-board-line: #d4cbb9;
+  --ng-ink: #24231f;
+  --ng-black: #2f2b26;
+}
+
+.board-svg .ng-board-bg {
+  fill: var(--ng-board);
+  stroke: var(--ng-board-line);
+  stroke-width: 1.5;
+}
+
+.board-svg .ng-cell {
+  stroke: rgba(36, 35, 31, 0.14);
+  stroke-width: 1;
+  pointer-events: none;
+}
+
+.board-svg .ng-cell.empty {
+  fill: var(--ng-paper);
+}
+
+.board-svg .ng-cell.black {
+  fill: var(--ng-black);
+  stroke: rgba(0, 0, 0, 0.35);
+}
+
+.board-svg .ng-cell.mark {
+  fill: #f4efe2;
+}
+
+.board-svg .ng-x {
+  fill: rgba(36, 35, 31, 0.35);
+  font-family: var(--font);
+  font-weight: 700;
+  text-anchor: middle;
+  dominant-baseline: central;
+  pointer-events: none;
+}
+
+.board-svg .ng-row-clue {
+  fill: var(--ng-ink);
+  font-family: var(--mono);
+  font-weight: 700;
+  text-anchor: end;
+  dominant-baseline: central;
+  pointer-events: none;
+}
+
+.board-svg .ng-col-clue {
+  fill: var(--ng-ink);
+  font-family: var(--mono);
+  font-weight: 700;
+  text-anchor: middle;
+  dominant-baseline: central;
+  pointer-events: none;
+}
+
+.board-svg .ng-row-clue.issue,
+.board-svg .ng-col-clue.issue {
+  fill: var(--error);
+}
+
+.board-svg .ng-error {
+  fill: rgba(194, 59, 46, 0.12);
+  stroke: var(--error);
+  stroke-width: 2.2;
+  pointer-events: none;
+}
+
+.board-svg .cell-hit {
+  pointer-events: all;
+}
+
+.board-svg .cell-hit:hover {
+  fill: rgba(31, 111, 92, 0.16);
+}
+
+.custom-cell.v-black {
+  background: var(--ng-black);
+  border-color: var(--ng-black);
+  color: #fffdf8;
+}
