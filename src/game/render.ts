@@ -7,14 +7,19 @@ import {
   asNonogramPuzzle,
   asNonogramState,
   BLACK,
+  cluePadding,
   EMPTY,
   MARK,
+  NONOGRAM_CELL,
   type NonogramResult,
 } from './types'
 
 export function metricsFor(puzzle: Puzzle): BoardMetrics {
-  const cell = 44
-  const pad = 88
+  const p = asNonogramPuzzle(puzzle)
+  const cell = NONOGRAM_CELL
+  // 留白随线索数量自适应：60×60 这类大盘面的长线索不会再溢出 SVG。
+  // 小盘面（内置题）所需留白远小于基准值，结果与旧版完全一致。
+  const pad = cluePadding(p.rowClues ?? [], p.colClues ?? [])
   return {
     cell,
     pad,

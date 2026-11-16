@@ -50,6 +50,54 @@ export function asNonogramState(s: GameState): NonogramState {
   return s as NonogramState
 }
 
+/* ────────────────────────── 棋盘留白 ────────────────────────── */
+
+/**
+ * 棋盘格宽（与 render.ts 保持一致）。
+ * 老内核的 BoardMetrics 只有单一 pad，行列线索同时挤在这块留白里，
+ * 所以这里的 pad 取「行线索所需宽度」与「列线索所需高度」的较大者。
+ */
+export const NONOGRAM_CELL = 44
+/** 小盘面的基准留白（保持旧外观不变） */
+export const NONOGRAM_MIN_PAD = 88
+
+/** 单个数字字符的估算宽度（字号 = 0.3 × 格宽） */
+const CLUE_FONT = NONOGRAM_CELL * 0.3
+const CLUE_DIGIT_W = CLUE_FONT * 0.58
+const CLUE_SPACE_W = CLUE_FONT * 0.3
+/** 列线索每行间距（与 render.ts 的 lineHeight 一致） */
+const CLUE_LINE_H = NONOGRAM_CELL * 0.32
+
+/**
+ * 计算棋盘留白：保证任意尺寸 / 任意线索数量下，行线索不会向左溢出、
+ * 列线索不会向上溢出。小盘面结果等于 NONOGRAM_MIN_PAD（旧外观完全不变）。
+ */
+export function cluePadding(rowClues: number[][], colClues: number[][]): number {
+  let maxRowWidth = 0
+  for (const runs of rowClues) {
+    let w = 0
+    if (!runs || runs.length === 0) {
+      w = CLUE_DIGIT_W
+    } else {
+      for (let k = 0; k < runs.length; k++) {
+        if (k > 0) w += CLUE_SPACE_W
+        w += String(runs[k]).length * CLUE_DIGIT_W
+      }
+    }
+    if (w > maxRowWidth) maxRowWidth = w
+  }
+  let maxRuns = 0
+  for (const runs of colClues) {
+    if (runs && runs.length > maxRuns) maxRuns = runs.length
+  }
+  // 行线索文字右对齐在 pad-10 处，左侧再留 10px 边距
+  const padLeft = Math.ceil(maxRowWidth + 20)
+  // 列线索最上面一行的基线在 pad-10-(maxRuns-1)*lineH，上方留出字高与边距
+  const padTop =
+    maxRuns <= 0 ? 0 : Math.ceil(10 + (maxRuns - 1) * CLUE_LINE_H + CLUE_FONT + 8)
+  return Math.max(NONOGRAM_MIN_PAD, padLeft, padTop)
+}
+
 /* ────────────────────────── 线索编码 ────────────────────────── */
 
 /**
