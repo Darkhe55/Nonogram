@@ -55,6 +55,19 @@ npm start
 - Web Audio 合成音效（无外部资源）
 - localStorage / 项目内 `data/` 存储进度与题库
 
+## 从图片导入题库（自动识图）
+
+```bash
+node scripts/import-image.mjs month.png                     # 只预览识别结果，不写入
+node scripts/import-image.mjs month.png --append            # 追加到 src/game/puzzles-data.ts
+node scripts/import-image.mjs month.png --append --verify   # 顺带校验唯一解并写入参考解
+```
+
+- 用 Playwright + Edge 无头浏览器读像素：投影找棋盘网格 → 连通域切出行/列提示数字 → 字体模板自动择优（优先 DejaVu Sans Bold，其次 Tahoma/Verdana 等系统字体）+ 字形簇识别；相邻两位数粘连时按模板切开。
+- 常用选项：`--name`、`--series`、`--width N --height N`（自动识别网格失败时手动指定）、`--map 0=3,1=2`（人工指定字形簇对应的数字）、`--dry`、`--debug <目录>`（输出识别覆盖图）、`--max-nodes`、`--verify-timeout`。
+- `--verify` 在子进程里调用项目求解器，大盘题超时或崩溃只警告，此时条目不写参考解。
+- 依赖 `playwright-core`（已在 devDependencies）和本机 Edge（默认 `C:\Program Files (x86)\Microsoft\Edge\Application\msedge.exe`，可用 `EDGE_PATH` 覆盖）。
+
 ## 项目结构
 
 ```
