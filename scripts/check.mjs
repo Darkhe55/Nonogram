@@ -5,8 +5,9 @@
 import { readFileSync } from 'node:fs'
 import path from 'node:path'
 import { BLACK, cluesFromSolution, decodeCells, decodeClues } from '../src/game/types.ts'
-import { isValidSolution, solveByRules } from '../src/game/rules.ts'
+import { isValidSolution } from '../src/game/rules.ts'
 import { countSolutions } from '../src/game/solver.ts'
+import { planLogicSolve } from '../src/game/logic.ts'
 
 const DATA_FILE = path.resolve('src/game/puzzles-data.ts')
 const text = readFileSync(DATA_FILE, 'utf8')
@@ -79,18 +80,39 @@ for (const e of entries) {
     continue
   }
 
-  const plan = solveByRules(decoded.rows, decoded.cols, size, e.width, e.height, true, 240)
-  if (!plan.ok || !plan.solution) {
-    console.warn(`[check] ${e.id} 规则无法单独推满（需要回溯）`)
-    warnings++
-  } else if (!plan.saturated) {
+  const puzzle = {
+    id: e.id,
+    name: e.name,
+    width: e.width,
+    height: e.height,
+    difficulty: e.difficulty,
+    rowClues: decoded.rows,
+    colClues: decoded.cols,
+  }
+  const plan = planLogicSolve(puzzle, {
+    puzzleId: e.id,
+    width: e.width,
+    height: e.height,
+    cells: new Array(size).fill(0),
+    givens: new Array(size).fill(0),
+  })
+  const st = plan.stats ?? {}
+  const byRule = {}
+  for (const f of plan.frames) byRule[f.rule] = (byRule[f.rule] ?? 0) + 1
+  const ruleText = Object.entries(byRule).map(([k, v]) => `R${k}:${v}`).join(' ') || '-'
+  if (!plan.finalState || !plan.saturated) {
     console.warn(`[check] ${e.id} 需要回溯（逻辑推演未饱和）`)
     warnings++
+  } else if (!isValidSolution(plan.finalState.cells, decoded.rows, decoded.cols, e.width, e.height)) {
+    console.error(`[check] ${e.id} 逻辑推演终态不合法`)
+    errors++
   }
 
   const black = solution.filter((v) => v === BLACK).length
   console.log(
-    `[check] ${e.id} ${e.width}×${e.height} 黑格 ${black} · 解唯一 · 逻辑${plan.saturated ? '可推满' : '需回溯'} · ${counted.nodes} 节点`,
+    `[check] ${e.id} ${e.width}×${e.height} 黑格 ${black} · 解唯一 · 逻辑可推满 · ${counted.nodes} 节点` +
+      `（${ruleText}；线解 ${st.lineSolves ?? 0} · DP ${st.dpStates ?? 0} 状态 · ` +
+      `反证 ${st.probes ?? 0} 次 · 回溯 ${st.searchNodes ?? 0} 节点 · ${plan.frames.length} 帧）`,
   )
 }
 

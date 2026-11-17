@@ -3,7 +3,7 @@
  */
 
 import type { GameState, Puzzle, ValidationResult } from '../core/types'
-import { enumerateLine, runsMatch } from './rules'
+import { lineFeasible, runsMatch } from './rules'
 import {
   asNonogramPuzzle,
   asNonogramState,
@@ -36,8 +36,7 @@ export function validate(state: GameState, puzzle: Puzzle): NonogramResult {
   for (let y = 0; y < h; y++) {
     const line: number[] = []
     for (let x = 0; x < w; x++) line.push(cells[y * w + x]!)
-    const placements = enumerateLine(rowClues[y] ?? [], line, w)
-    if (placements.length === 0) {
+    if (!lineFeasible(rowClues[y] ?? [], line, w)) {
       lineIssues.push({ orientation: 'row', index: y, clues: rowClues[y] ?? [] })
       for (let x = 0; x < w; x++) bad.add(y * w + x)
     }
@@ -46,8 +45,7 @@ export function validate(state: GameState, puzzle: Puzzle): NonogramResult {
   for (let x = 0; x < w; x++) {
     const line: number[] = []
     for (let y = 0; y < h; y++) line.push(cells[y * w + x]!)
-    const placements = enumerateLine(colClues[x] ?? [], line, h)
-    if (placements.length === 0) {
+    if (!lineFeasible(colClues[x] ?? [], line, h)) {
       lineIssues.push({ orientation: 'col', index: x, clues: colClues[x] ?? [] })
       for (let y = 0; y < h; y++) bad.add(y * w + x)
     }
