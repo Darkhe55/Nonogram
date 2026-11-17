@@ -40,8 +40,8 @@ export function cloneState(state: GameState): NonogramState {
 export function cycleValue(state: GameState, target: HitTarget): number {
   const s = asNonogramState(state)
   const v = s.cells[target.index] ?? EMPTY
-  if (v === EMPTY) return BLACK
-  if (v === BLACK) return MARK
+  // 左键：空/负面(标记) → 正面(黑)；正面 → 空
+  if (v === EMPTY || v === MARK) return BLACK
   return EMPTY
 }
 
